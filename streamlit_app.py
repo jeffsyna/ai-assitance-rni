@@ -142,7 +142,20 @@ Use at least two active ingredients from the provided list and adjust contents a
             with urllib.request.urlopen(req) as response:
                 result = response.read()
                 response_data = json.loads(result.decode('utf-8'))
-                return response_data['choices'][0]['message']['content']
+
+                # Debug logging
+                print("Response data:", response_data)  # 전체 응답 데이터 확인
+                
+                if 'choices' not in response_data or not response_data['choices']:
+                    return "죄송합니다. 응답을 받지 못했습니다. 다시 시도해주세요."
+                
+                message = response_data['choices'][0].get('message', {})
+                if not message or 'content' not in message:
+                    return "죄송합니다. 응답 내용이 비어있습니다. 다시 시도해주세요."
+                
+                return message['content']
+
+        
                 
         except urllib.error.HTTPError as error:
             if error.code == 500 and attempt < max_retries - 1:
