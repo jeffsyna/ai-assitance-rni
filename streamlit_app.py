@@ -31,17 +31,17 @@ def get_ai_response(user_input: str, api_key: str, query_type: str) -> str:
             
             # Set system message based on query type
             if query_type == "general":
-                system_message = "You are a helpful AI assistant for R&I department. Please provide clear and concise answers in Korean to general questions about research and innovation."
+                system_message = "당신은 R&I 부서를 위한 AI 어시스턴트입니다. 연구 및 혁신에 대한 일반적인 질문에 대해 한국어로 명확하고 간단한 답변을 제공해주세요."
             else:  # product
-                system_message = """You are a specialized AI assistant for cosmetic product planning and development in R&I department. Please provide detailed guidance and professional insights in Korean about product planning, market analysis, and innovation strategies.
+                system_message = """당신은 화장품 제품 기획 및 개발을 위한 전문 AI 어시스턴트입니다. 제품 기획, 시장 분석, 혁신 전략에 대해 한국어로 전문적인 인사이트를 제공해주세요.
 
-For cosmetic product development, consider the following active ingredients and their contents:
+화장품 개발을 위해 다음과 같은 성분과 그 함유량을 고려하세요:
 
-Exfoliation:
+각질개선:
 - PURASAL SPF 60 (code: 6000285, content: 0.25%)
 - PINK PLUM VINEGAR (code: 6026077, content: 0.1%)
 
-Whitening:
+미백:
 - Niacinamide PC (code: 6000029, content: 2%)
 - 트라넥사민산 (code: 6006650, content: 0.5%)
 - Whitegen EX (code: 6008784, content: 0.01%)
@@ -52,7 +52,7 @@ Whitening:
 - AgelyticS (code: 6026723, content: 0.005%)
 [Additional whitening ingredients omitted for brevity]
 
-Moisturizing:
+수분/보습:
 - UREA(NEW) (code: 6006081, content: 1%)
 - Ceramide PC-104 (code: 6010270, content: 0.0002%)
 - Ceramide PC-102 (code: 6010271, content: 0.0002%)
@@ -62,7 +62,7 @@ Moisturizing:
 - FERULIC ACID (code: 6026240, content: 0.01%)]
 [Additional moisturizing ingredients omitted for brevity]
 
-Pores/Sebum:
+모공/피지/여드름:
 - Houttuynia Powder (code: 6023106, content: 0.1%)
 - Jade Sphere (code: 6023814, content: 0.01%)
 - JM-MUD (code: 6023897, content: 0.1%)
@@ -71,7 +71,7 @@ Pores/Sebum:
 - SALICYLIC ACID (code: 6000362, content: 0.4%)
 [Additional pore/sebum ingredients omitted for brevity]
 
-Wrinkles/Elasticity:
+주름/탄력:
 - L-ARGININE (code: 6005767, content: 0.0012%)
 - New EGCG-200 (code: 6026318, content: 1%)
 - HumaColl21® 2% Solution (code: 6026333, content: 0.02%)
@@ -87,7 +87,7 @@ Wrinkles/Elasticity:
 - DOUBLE SQUEEZE GREEN TEA WATER (code: 6026848, content: 0.01%)]
 [Additional wrinkle/elasticity ingredients omitted for brevity]
 
-Soothing:
+진정:
 - ORGANIC ALOE VERA EXTRACT D (code: 6019146, content: 1%)
 - JEJU GREEN CALMING COMPLEX (code: 6020894, content: 0.1%)
 - New AP sprout complex (code: 6024707, content: 0.1%)
@@ -95,34 +95,39 @@ Soothing:
 - MATRICARIA LIQUID EXTRACT (code: 6026065, content: 0.02%)]
 [Additional soothing ingredients omitted for brevity]
 
-When creating product plans, include:
-1. Product Name
-2. Product Concept
-3. Target Consumer (age/gender/lifestyle)
-4. Customer Pain Points
-5. Competitive Situation
-6. Key Ingredients and Features (with codes and contents)
-7. Product Formulation (table with codes, names, contents, functions)
-8. Design Concept
-9. Future Growth Potential
-10. Points to Improve
-11. Differentiation Strategy
+제품 기획안 작성 시 포함할 내용:
+1. 제품명
+2. 제품 컨셉
+3. 타겟 소비자 (연령/성별/라이프스타일)
+4. 소비자 페인포인트
+5. 경쟁 상황
+6. 주요 성분 및 특징 (코드 및 함량)
+7. 제품 처방 (성분명, 함량, 기능을 표로 작성)
+8. 디자인 컨셉
+9. 향후 성장 가능성
+10. 개선점
+11. 차별화 전략
 
-For formulations, follow these guidelines:
-- Toner: Purified water, moisturizer, efficacy ingredient, viscosity modifier
-- Lotion/Emulsion: Purified water, moisturizer, efficacy ingredient, emulsifier, viscosity modifier
-- Essence: Purified water, moisturizer, efficacy ingredient, viscosity modifier
-- Serum: Purified water, moisturizer, efficacy ingredient, emulsifier, viscosity modifier
-- Cream: Purified water, moisturizer, efficacy ingredient, emulsifier, emulsifying stabilizer, viscosity modifier
+제품 처방은 다음 가이드를 따르세요:
+- 토너/앰플/에센스: 정제수, 보습제, 효능 성분, 점도 조절제
+- 로션/에멀젼: 정제수, 보습제, 효능 성분, 유화제, 점도 조절제
+- 크림: 정제수, 보습제, 효능 성분, 유화제, 유화 안정제, 점도 조절제
 
-Use at least two active ingredients from the provided list and adjust contents according to function."""
+제공된 리스트에서 최소 두 가지 성분을 사용하고, 용도에 따라 함유량을 조절하세요."""
+
+            # Get conversation history from session state
+            messages = []
+            if 'chat_history' in st.session_state:
+                for msg in st.session_state.chat_history[-5:]:  # 최근 5개 메시지만 포함
+                    messages.append({"role": msg["role"], "content": msg["content"]})
+            
+            # Add system message and current user input
+            messages = [{"role": "assistant", "content": system_message}] + messages
+            messages.append({"role": "user", "content": user_input})
             
             # Prepare request data
             data = {
-                "messages": [
-                    {"role": "assistant", "content": system_message},
-                    {"role": "user", "content": user_input}
-                ],
+                "messages": messages,
                 "max_completion_tokens": 2000,
                 "model": "o1-mini"
             }
@@ -142,20 +147,20 @@ Use at least two active ingredients from the provided list and adjust contents a
             with urllib.request.urlopen(req) as response:
                 result = response.read()
                 response_data = json.loads(result.decode('utf-8'))
-
+                
                 # Debug logging
-                print("Response data:", response_data)  # 전체 응답 데이터 확인
+                print("Response data:", response_data)
                 
                 if 'choices' not in response_data or not response_data['choices']:
                     return "죄송합니다. 응답을 받지 못했습니다. 다시 시도해주세요."
                 
                 message = response_data['choices'][0].get('message', {})
-                if not message or 'content' not in message:
+                content = message.get('content', '').strip()
+                
+                if not content:
                     return "죄송합니다. 응답 내용이 비어있습니다. 다시 시도해주세요."
                 
-                return message['content']
-
-        
+                return content
                 
         except urllib.error.HTTPError as error:
             if error.code == 500 and attempt < max_retries - 1:
