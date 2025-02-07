@@ -3,6 +3,8 @@ import json
 import os
 import ssl
 import streamlit as st
+import time
+from urllib.error import HTTPError
 
 def allowSelfSignedHttps(allowed):
     """
@@ -13,21 +15,25 @@ def allowSelfSignedHttps(allowed):
 
 def get_ai_response(user_input: str, api_key: str, query_type: str) -> str:
     """
-    Get AI response from the endpoint
+    Get AI response from the endpoint with retry logic
     """
-    try:
-        # Enable SSL bypass
-        allowSelfSignedHttps(True)
-        
-        # Prepare the request
-        url = 'https://APSWC-DEV-AI-OpenAI.openai.azure.com/openai/deployments/gpt-4o/chat/completions'
-        api_version = '2024-08-01-preview'
-        
-        # Set system message based on query type
-        if query_type == "general":
-            system_message = "You are a helpful AI assistant for R&I department. Please provide clear and concise answers in Korean to general questions about research and innovation."
-        else:  # product
-            system_message = """You are a specialized AI assistant for cosmetic product planning and development in R&I department. Please provide detailed guidance and professional insights in Korean about product planning, market analysis, and innovation strategies.
+    max_retries = 3
+    retry_delay = 2  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            # Enable SSL bypass
+            allowSelfSignedHttps(True)
+            
+            # Prepare the request
+            url = 'https://aisolcopilot7010956395.openai.azure.com/openai/deployments/o1-mini/chat/completions'
+            api_version = '2024-08-01-preview'
+            
+            # Set system message based on query type
+            if query_type == "general":
+                system_message = "You are a helpful AI assistant for R&I department. Please provide clear and concise answers in Korean to general questions about research and innovation."
+            else:  # product
+                system_message = """You are a specialized AI assistant for cosmetic product planning and development in R&I department. Please provide detailed guidance and professional insights in Korean about product planning, market analysis, and innovation strategies.
 
 For cosmetic product development, consider the following active ingredients and their contents:
 
@@ -110,41 +116,55 @@ For formulations, follow these guidelines:
 - Cream: Purified water, moisturizer, efficacy ingredient, emulsifier, emulsifying stabilizer, viscosity modifier
 
 Use at least two active ingredients from the provided list and adjust contents according to function."""
-        
-        # Prepare request data
-        data = {
-            "messages": [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_input}
-            ],
-            "temperature": 0.7,
-            "max_tokens": 2000  # Increased for longer responses
-        }
-        body = str.encode(json.dumps(data))
-        
-        # Prepare headers
-        headers = {
-            'Content-Type': 'application/json',
-            'api-key': api_key
-        }
-        
-        # Create and send request
-        full_url = f"{url}?api-version={api_version}"
-        req = urllib.request.Request(full_url, body, headers)
-        
-        # Get response
-        with urllib.request.urlopen(req) as response:
-            result = response.read()
-            response_data = json.loads(result.decode('utf-8'))
-            return response_data['choices'][0]['message']['content']
             
-    except urllib.error.HTTPError as error:
-        error_message = f"요청 실패 - 상태 코드: {error.code}\n"
-        error_message += f"오류 정보: {error.info()}\n"
-        error_message += error.read().decode("utf8", 'ignore')
-        return error_message
-    except Exception as e:
-        return f"오류 발생: {str(e)}"
+            # Prepare request data
+            data = {
+                "messages": [
+                    {"role": "assistant", "content": system_message},
+                    {"role": "user", "content": user_input}
+                ],
+                "max_completion_tokens": 2000,
+                "model": "o1-mini"
+            }
+            body = str.encode(json.dumps(data))
+            
+            # Prepare headers
+            headers = {
+                'Content-Type': 'application/json',
+                'api-key': api_key
+            }
+            
+            # Create and send request
+            full_url = f"{url}?api-version={api_version}"
+            req = urllib.request.Request(full_url, body, headers)
+            
+            # Get response
+            with urllib.request.urlopen(req) as response:
+                result = response.read()
+                response_data = json.loads(result.decode('utf-8'))
+                return response_data['choices'][0]['message']['content']
+                
+        except urllib.error.HTTPError as error:
+            if error.code == 500 and attempt < max_retries - 1:
+                error_message = f"서버 오류 발생 - {attempt + 1}번째 시도 실패. {retry_delay}초 후 재시도합니다...\n"
+                st.warning(error_message)
+                time.sleep(retry_delay)
+                retry_delay *= 2  # 지수 백오프
+                continue
+            error_message = f"요청 실패 - 상태 코드: {error.code}\n"
+            error_message += f"오류 정보: {error.info()}\n"
+            error_message += error.read().decode("utf8", 'ignore')
+            return error_message
+        except Exception as e:
+            if attempt < max_retries - 1:
+                error_message = f"오류 발생 - {attempt + 1}번째 시도 실패. {retry_delay}초 후 재시도합니다...\n"
+                st.warning(error_message)
+                time.sleep(retry_delay)
+                retry_delay *= 2  # 지수 백오프
+                continue
+            return f"오류 발생: {str(e)}"
+    
+    return "최대 재시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."
 
 def main():
     # Page config
