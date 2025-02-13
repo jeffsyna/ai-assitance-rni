@@ -43,19 +43,19 @@ def get_ai_response(user_input: str, api_key: str, query_type: str) -> str:
 
 미백:
 - Niacinamide PC (code: 6000029, content: 2%)
-- 트라넥사민산 (code: 6006650, content: 0.5%, clinical content: 1%)
+- 트라넥사민산 (code: 6006650, content: 0.5-1%)
 - Whitegen EX (code: 6008784, content: 0.01%)
-- 삼백초추출물 (code: 6016434, content: 0.0001%, clinical content: 0.1%)
+- 삼백초추출물 (code: 6016434, content: 0.1%)
 - Ascorbic Acid Fine powder (code: 6018508, content: 0.7812%)
 - New 닥나무뿌리추출물 (code: 6018603, content: 0.1%)
-- COS-VCE-K (code: 6020206, content: 0.01%, clinical content: 0.1%)
-- AgelyticS (code: 6026723, content: 0.005%, clinical content: 0.01%)
+- COS-VCE-K (code: 6020206, content: 0.1%)
+- AgelyticS (code: 6026723, content: 0.01%)
 [Additional whitening ingredients omitted for brevity]
 
 수분/보습:
 - UREA(NEW) (code: 6006081, content: 1%)
-- Ceramide PC-104 (code: 6010270, content: 0.0002%, clinical content: 1%)
-- Ceramide PC-102 (code: 6010271, content: 0.0002%, clinical content: 1%)
+- Ceramide PC-104 (code: 6010270, content: 1%)
+- Ceramide PC-102 (code: 6010271, content: 1%)
 - Glyacid 70 HP (code: 6010544, content: 0.0001%)
 - Red Pine Needle (code: 6025370, content: 0.3%)
 - VERI-ENT MOISTURIZING WATER_10 (code: 6026185, content: 0.01%)
@@ -77,12 +77,12 @@ def get_ai_response(user_input: str, api_key: str, query_type: str) -> str:
 - HumaColl21® 2% Solution (code: 6026333, content: 0.02%)
 - Adenosine (code: 6026519, content: 0.02%)
 - CAMELLIA F (code: 6026553, content: 0.0001%)
-- LactoPDRN (code: 6026575, content: 0.6%, clinical content: 20%)
+- LactoPDRN (code: 6026575, content: 1-20%)
 - SUPER COLLAGEN (code: 6026648, content: 0.0025%)
-- AgeRefect (code: 6026649, content: 0.0003%, clinical content: 0.1%)
+- AgeRefect (code: 6026649, content: 0.1%)
 - CYLASPHERE RETINOL 10S (code: 6026656, content: 1%)
 - CO2LLAGENEER (code: 6026684, content: 0.1%)
-- Hi-Aqua™ FL (code: 6026745, content: 0.005%, clinical content: 0.2%)
+- Hi-Aqua™ FL (code: 6026745, content: 0.2%)
 - Green Tea Infusion (code: 6026750, content: 0.1%)
 - DOUBLE SQUEEZE GREEN TEA WATER (code: 6026848, content: 0.01%)]
 [Additional wrinkle/elasticity ingredients omitted for brevity]
@@ -102,7 +102,7 @@ def get_ai_response(user_input: str, api_key: str, query_type: str) -> str:
 4. 소비자 페인포인트
 5. 경쟁 상황 (시장 환경, 경쟁사 제품들 분석)
 6. 주요 성분 및 특징 (코드 및 함량)
-7. 제품 처방 (코드, 성분명, 함량, 임상 함량(작성 가능하다면), 기능을 표로 작성)
+7. 제품 처방 (코드, 성분명, 함량, 기능을 표로 작성)
 8. 디자인 컨셉
 9. 향후 성장 가능성
 10. 개선점
